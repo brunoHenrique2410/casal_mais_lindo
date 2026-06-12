@@ -61,6 +61,15 @@ st.markdown("""
     border:1px solid rgba(255,255,255,0.18);
 }
 
+.entrada {
+    margin-top: 90px;
+    padding: 45px;
+    border-radius: 35px;
+    background: rgba(255,255,255,0.12);
+    box-shadow: 0 0 45px rgba(255,105,180,0.45);
+    text-align: center;
+}
+
 .stButton > button {
     width:100%;
     border-radius:22px;
@@ -111,11 +120,25 @@ def carregar_musicas():
     ])
 
 
+def tocar_musica_oculta(musica):
+    with open(musica, "rb") as f:
+        b64 = base64.b64encode(f.read()).decode()
+
+    st.markdown(f"""
+    <audio autoplay loop style="display:none;">
+        <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+    </audio>
+    """, unsafe_allow_html=True)
+
+
 def slideshow_html(fotos):
     imagens = []
+
     for foto in fotos:
         with open(foto, "rb") as f:
-            imagens.append("data:image/jpeg;base64," + base64.b64encode(f.read()).decode())
+            imagens.append(
+                "data:image/jpeg;base64," + base64.b64encode(f.read()).decode()
+            )
 
     slides = ""
     for img in imagens:
@@ -137,6 +160,7 @@ def slideshow_html(fotos):
         background:#160b19;
         border:2px solid rgba(255,255,255,0.18);
     }}
+
     .slide {{
         display:none;
         width:100%;
@@ -145,6 +169,7 @@ def slideshow_html(fotos):
         background-size:cover;
         background-position:center;
     }}
+
     .slide::before {{
         content:"";
         position:absolute;
@@ -154,6 +179,7 @@ def slideshow_html(fotos):
         transform:scale(1.18);
         opacity:0.52;
     }}
+
     .slide img {{
         position:relative;
         width:100%;
@@ -161,7 +187,11 @@ def slideshow_html(fotos):
         object-fit:contain;
         z-index:2;
     }}
-    .fade {{animation: fadeEffect 1.8s;}}
+
+    .fade {{
+        animation: fadeEffect 1.8s;
+    }}
+
     @keyframes fadeEffect {{
         from {{opacity:.25}}
         to {{opacity:1}}
@@ -182,7 +212,9 @@ def slideshow_html(fotos):
             slides[i].style.display = "none";
         }}
         slideIndex++;
-        if (slideIndex > slides.length) {{slideIndex = 1;}}
+        if (slideIndex > slides.length) {{
+            slideIndex = 1;
+        }}
         slides[slideIndex - 1].style.display = "block";
         setTimeout(showSlides, 3200);
     }}
@@ -197,51 +229,95 @@ def trocar_pagina(pagina):
 if "pagina" not in st.session_state:
     st.session_state.pagina = "🏠 Início"
 
-if "musica_atual" not in st.session_state:
-    st.session_state.musica_atual = 0
+if "site_liberado" not in st.session_state:
+    st.session_state.site_liberado = False
 
 
 fotos = carregar_fotos()
 musicas = carregar_musicas()
 
+
+# =========================
+# TELA DE ENTRADA
+# =========================
+
+if not st.session_state.site_liberado:
+    st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
+    st.markdown(
+        "<div class='subtitulo'>Um cantinho especial para o casal mais lindo do Brasil</div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown("""
+    <div class="entrada">
+        <h2>Uma pequena surpresa feita com carinho ❤️</h2>
+        <p>Clique no botão abaixo para entrar.</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.write("")
+
+    col_a, col_b, col_c = st.columns([1, 2, 1])
+    with col_b:
+        if st.button("❤️ Entrar no cantinho do casal ❤️"):
+            st.session_state.site_liberado = True
+            st.rerun()
+
+    st.stop()
+
+
+# =========================
+# MÚSICA OCULTA
+# =========================
+
+if musicas:
+    tocar_musica_oculta(musicas[0])
+
+
+# =========================
+# CABEÇALHO
+# =========================
+
 st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
 
-if musicas:
-    col_audio, col_next = st.columns([5, 1])
-    with col_audio:
-        st.audio(musicas[st.session_state.musica_atual], format="audio/mp3")
-    with col_next:
-        if st.button("🎵 Próxima"):
-            st.session_state.musica_atual = (st.session_state.musica_atual + 1) % len(musicas)
-            st.rerun()
-else:
-    st.warning("Coloque músicas .mp3 dentro da pasta /musicas.")
 
-st.write("")
+# =========================
+# MENU
+# =========================
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
     if st.button("🏠 Início"):
         trocar_pagina("🏠 Início")
+
 with col2:
     if st.button("📸 Galeria"):
         trocar_pagina("📸 Galeria")
+
 with col3:
     if st.button("💕 Motivos"):
         trocar_pagina("💕 Motivos")
+
 with col4:
     if st.button("🎮 Quiz"):
         trocar_pagina("🎮 Quiz")
+
 with col5:
     if st.button("💌 Cartinha"):
         trocar_pagina("💌 Cartinha")
+
 with col6:
     if st.button("🌟 Futuro"):
         trocar_pagina("🌟 Futuro")
 
 st.write("")
+
+
+# =========================
+# PÁGINAS
+# =========================
 
 if st.session_state.pagina == "🏠 Início":
     if fotos:
@@ -256,6 +332,7 @@ if st.session_state.pagina == "🏠 Início":
     </div>
     """, unsafe_allow_html=True)
 
+
 elif st.session_state.pagina == "📸 Galeria":
     st.markdown("<div class='titulo'>Galeria de Momentos 📸</div>", unsafe_allow_html=True)
 
@@ -266,6 +343,7 @@ elif st.session_state.pagina == "📸 Galeria":
                 st.image(foto, use_container_width=True)
     else:
         st.info("Adicione fotos na pasta /fotos.")
+
 
 elif st.session_state.pagina == "💕 Motivos":
     st.markdown("<div class='titulo'>Motivos para Shippar 💕</div>", unsafe_allow_html=True)
@@ -287,6 +365,7 @@ elif st.session_state.pagina == "💕 Motivos":
     for motivo in motivos:
         st.markdown(f"<div class='card'>{motivo}</div>", unsafe_allow_html=True)
 
+
 elif st.session_state.pagina == "🎮 Quiz":
     st.markdown("<div class='titulo'>Quiz do Casal 🎮</div>", unsafe_allow_html=True)
 
@@ -301,13 +380,19 @@ elif st.session_state.pagina == "🎮 Quiz":
 
     with st.form("quiz_casal"):
         respostas = []
+
         for i, (pergunta, opcoes, correta) in enumerate(perguntas):
-            respostas.append(st.radio(pergunta, opcoes, key=f"quiz_{i}"))
+            respostas.append(
+                st.radio(pergunta, opcoes, key=f"quiz_{i}")
+            )
 
         enviar = st.form_submit_button("Ver resultado ❤️")
 
     if enviar:
-        pontos = sum(1 for i, item in enumerate(perguntas) if respostas[i] == item[2])
+        pontos = sum(
+            1 for i, item in enumerate(perguntas)
+            if respostas[i] == item[2]
+        )
 
         st.markdown(f"""
         <div class="card">
@@ -322,6 +407,7 @@ elif st.session_state.pagina == "🎮 Quiz":
             st.success("Mandou bem! Você sabe bastante sobre eles 😄")
         else:
             st.warning("Hmm... precisa acompanhar mais esse casal kkkkk")
+
 
 elif st.session_state.pagina == "💌 Cartinha":
     st.markdown("<div class='titulo'>Cartinha Especial 💌</div>", unsafe_allow_html=True)
@@ -340,6 +426,7 @@ elif st.session_state.pagina == "💌 Cartinha":
     </div>
     """, unsafe_allow_html=True)
 
+
 elif st.session_state.pagina == "🌟 Futuro":
     st.markdown("<div class='titulo'>O Futuro de Vocês 🌟</div>", unsafe_allow_html=True)
 
@@ -354,6 +441,7 @@ elif st.session_state.pagina == "🌟 Futuro":
 
     for sonho in sonhos:
         st.markdown(f"<div class='card'>✨ {sonho}</div>", unsafe_allow_html=True)
+
 
 st.markdown("""
 <div class="footer">
