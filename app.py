@@ -10,26 +10,14 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# =========================
-# CONFIGURAÇÕES
-# =========================
-
 NOME_1 = "Gabriel Ramos"
 NOME_2 = "Rilary Escobar"
 MUSICA = "musica.mp3"
 PASTA_FOTOS = "fotos"
 
-# =========================
-# CSS
-# =========================
-
 st.markdown("""
 <style>
-[data-testid="stSidebar"] {
-    display: none;
-}
-
-[data-testid="collapsedControl"] {
+[data-testid="stSidebar"], [data-testid="collapsedControl"] {
     display: none;
 }
 
@@ -72,11 +60,6 @@ st.markdown("""
     font-size: 20px;
 }
 
-.menu-container {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
 .stButton > button {
     width: 100%;
     border-radius: 18px;
@@ -108,9 +91,6 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
-# =========================
-# FUNÇÕES
-# =========================
 
 def carregar_fotos():
     if not os.path.exists(PASTA_FOTOS):
@@ -151,7 +131,7 @@ def slideshow_html(fotos):
     slides = ""
     for img in imagens_base64:
         slides += f"""
-        <div class="slide fade">
+        <div class="slide fade" style="background-image: url('{img}')">
             <img src="{img}">
         </div>
         """
@@ -166,18 +146,34 @@ def slideshow_html(fotos):
         border-radius: 32px;
         overflow: hidden;
         box-shadow: 0 0 40px rgba(255, 105, 180, 0.7);
+        background: #160b19;
     }}
 
     .slide {{
         display: none;
         width: 100%;
         height: 100%;
+        position: relative;
+        background-size: cover;
+        background-position: center;
+    }}
+
+    .slide::before {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: inherit;
+        filter: blur(25px);
+        transform: scale(1.15);
+        opacity: 0.45;
     }}
 
     .slide img {{
+        position: relative;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        z-index: 2;
     }}
 
     .fade {{
@@ -223,26 +219,14 @@ def trocar_pagina(pagina):
     st.session_state.pagina = pagina
 
 
-# =========================
-# ESTADO
-# =========================
-
 if "pagina" not in st.session_state:
     st.session_state.pagina = "🏠 Início"
 
 fotos = carregar_fotos()
 tocar_musica()
 
-# =========================
-# CABEÇALHO
-# =========================
-
 st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
-
-# =========================
-# MENU SUPERIOR
-# =========================
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
@@ -259,8 +243,8 @@ with col3:
         trocar_pagina("💕 Motivos")
 
 with col4:
-    if st.button("😂 Curiosidades"):
-        trocar_pagina("😂 Curiosidades")
+    if st.button("🎮 Quiz"):
+        trocar_pagina("🎮 Quiz")
 
 with col5:
     if st.button("💌 Cartinha"):
@@ -271,10 +255,6 @@ with col6:
         trocar_pagina("🌟 Futuro")
 
 st.write("")
-
-# =========================
-# PÁGINA INÍCIO
-# =========================
 
 if st.session_state.pagina == "🏠 Início":
     if fotos:
@@ -289,10 +269,6 @@ if st.session_state.pagina == "🏠 Início":
     </div>
     """, unsafe_allow_html=True)
 
-# =========================
-# PÁGINA GALERIA
-# =========================
-
 elif st.session_state.pagina == "📸 Galeria":
     st.markdown("<div class='titulo'>Galeria de Momentos 📸</div>", unsafe_allow_html=True)
 
@@ -304,10 +280,6 @@ elif st.session_state.pagina == "📸 Galeria":
                 st.image(foto, use_container_width=True)
     else:
         st.info("Adicione fotos na pasta /fotos.")
-
-# =========================
-# PÁGINA MOTIVOS
-# =========================
 
 elif st.session_state.pagina == "💕 Motivos":
     st.markdown("<div class='titulo'>Motivos para Shippar 💕</div>", unsafe_allow_html=True)
@@ -329,30 +301,75 @@ elif st.session_state.pagina == "💕 Motivos":
     for motivo in motivos:
         st.markdown(f"<div class='card'>{motivo}</div>", unsafe_allow_html=True)
 
-# =========================
-# PÁGINA CURIOSIDADES
-# =========================
-
-elif st.session_state.pagina == "😂 Curiosidades":
-    st.markdown("<div class='titulo'>Curiosidades do Casal 😂</div>", unsafe_allow_html=True)
+elif st.session_state.pagina == "🎮 Quiz":
+    st.markdown("<div class='titulo'>Quiz do Casal 🎮</div>", unsafe_allow_html=True)
 
     perguntas = [
-        "Quem é mais ciumento?",
-        "Quem demora mais para responder?",
-        "Quem sente mais saudade?",
-        "Quem é mais dramático?",
-        "Quem pede desculpas primeiro?",
-        "Quem é mais provável de mandar áudio gigante?",
-        "Quem escolheria o filme ruim só pela capa?",
-        "Quem roubaria comida do prato do outro?"
+        {
+            "pergunta": "Quem é mais provável de sentir saudade primeiro?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Os dois"
+        },
+        {
+            "pergunta": "Quem é mais provável de mandar áudio gigante?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Gabriel"
+        },
+        {
+            "pergunta": "Quem é mais provável de roubar comida do prato do outro?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Rilary"
+        },
+        {
+            "pergunta": "Quem é mais provável de fazer drama?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Os dois"
+        },
+        {
+            "pergunta": "Quem é mais provável de pedir desculpas primeiro?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Gabriel"
+        },
+        {
+            "pergunta": "Quem é mais provável de escolher o filme e dormir no meio?",
+            "opcoes": ["Gabriel", "Rilary", "Os dois"],
+            "resposta": "Os dois"
+        }
     ]
 
-    for p in perguntas:
-        st.markdown(f"<div class='card'>💭 {p}</div>", unsafe_allow_html=True)
+    pontos = 0
 
-# =========================
-# PÁGINA CARTINHA
-# =========================
+    with st.form("quiz_casal"):
+        respostas_usuario = []
+
+        for i, item in enumerate(perguntas):
+            resposta = st.radio(
+                item["pergunta"],
+                item["opcoes"],
+                key=f"quiz_{i}"
+            )
+            respostas_usuario.append(resposta)
+
+        enviar = st.form_submit_button("Ver resultado ❤️")
+
+    if enviar:
+        for i, item in enumerate(perguntas):
+            if respostas_usuario[i] == item["resposta"]:
+                pontos += 1
+
+        st.markdown(f"""
+        <div class="card">
+            Resultado: {pontos}/{len(perguntas)} acertos ❤️
+        </div>
+        """, unsafe_allow_html=True)
+
+        if pontos == len(perguntas):
+            st.balloons()
+            st.success("Perfeito! Você conhece esse casal melhor que todo mundo 😍")
+        elif pontos >= 4:
+            st.success("Mandou bem! Você sabe bastante sobre eles 😄")
+        else:
+            st.warning("Hmm... precisa acompanhar mais esse casal kkkkk")
 
 elif st.session_state.pagina == "💌 Cartinha":
     st.markdown("<div class='titulo'>Cartinha Especial 💌</div>", unsafe_allow_html=True)
@@ -371,10 +388,6 @@ elif st.session_state.pagina == "💌 Cartinha":
     </div>
     """, unsafe_allow_html=True)
 
-# =========================
-# PÁGINA FUTURO
-# =========================
-
 elif st.session_state.pagina == "🌟 Futuro":
     st.markdown("<div class='titulo'>O Futuro de Vocês 🌟</div>", unsafe_allow_html=True)
 
@@ -389,10 +402,6 @@ elif st.session_state.pagina == "🌟 Futuro":
 
     for sonho in sonhos:
         st.markdown(f"<div class='card'>✨ {sonho}</div>", unsafe_allow_html=True)
-
-# =========================
-# RODAPÉ
-# =========================
 
 st.markdown("""
 <div class="footer">
