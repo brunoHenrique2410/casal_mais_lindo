@@ -1,5 +1,4 @@
 import streamlit as st
-import base64
 import os
 import random
 
@@ -15,7 +14,6 @@ NOME_2 = "Rilary Escobar"
 
 PASTA_FOTOS = "fotos"
 PASTA_MUSICAS = "musicas"
-VOLUME_MUSICA = 0.25
 
 st.markdown("""
 <style>
@@ -26,7 +24,6 @@ st.markdown("""
 }
 [data-testid="stHeader"] {background: transparent;}
 .block-container {padding-top: 25px;}
-
 .titulo {
     text-align:center;
     font-size:52px;
@@ -91,23 +88,9 @@ def carregar_musicas():
     ])
 
 
-def tocar_musica_html(musica):
-    with open(musica, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode()
-
-    st.markdown(f"""
-    <audio controls autoplay style="width:100%;">
-        <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-    </audio>
-
-    <script>
-    const audios = window.parent.document.querySelectorAll("audio");
-    audios.forEach(a => a.volume = {VOLUME_MUSICA});
-    </script>
-    """, unsafe_allow_html=True)
-
-
 def slideshow_html(fotos):
+    import base64
+
     imagens = []
     for foto in fotos:
         with open(foto, "rb") as f:
@@ -209,11 +192,11 @@ st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_
 if not st.session_state.site_liberado:
     st.markdown("""
     <div class="card">
-        Clique para entrar no cantinho do casal e ativar a música ❤️
+        Clique para entrar no cantinho do casal ❤️
     </div>
     """, unsafe_allow_html=True)
 
-    if st.button("❤️ Entrar e ativar música ❤️"):
+    if st.button("❤️ Entrar ❤️"):
         st.session_state.site_liberado = True
         st.rerun()
 
@@ -221,12 +204,12 @@ if not st.session_state.site_liberado:
 
 
 if musicas:
-    col_m1, col_m2 = st.columns([4, 1])
+    col_audio, col_next = st.columns([5, 1])
 
-    with col_m1:
-        tocar_musica_html(musicas[st.session_state.musica_atual])
+    with col_audio:
+        st.audio(musicas[st.session_state.musica_atual], format="audio/mp3")
 
-    with col_m2:
+    with col_next:
         if st.button("🎵 Próxima"):
             st.session_state.musica_atual += 1
             if st.session_state.musica_atual >= len(musicas):
@@ -241,18 +224,23 @@ col1, col2, col3, col4, col5, col6 = st.columns(6)
 with col1:
     if st.button("🏠 Início"):
         trocar_pagina("🏠 Início")
+
 with col2:
     if st.button("📸 Galeria"):
         trocar_pagina("📸 Galeria")
+
 with col3:
     if st.button("💕 Motivos"):
         trocar_pagina("💕 Motivos")
+
 with col4:
     if st.button("🎮 Quiz"):
         trocar_pagina("🎮 Quiz")
+
 with col5:
     if st.button("💌 Cartinha"):
         trocar_pagina("💌 Cartinha")
+
 with col6:
     if st.button("🌟 Futuro"):
         trocar_pagina("🌟 Futuro")
