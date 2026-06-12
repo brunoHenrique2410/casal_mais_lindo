@@ -1,6 +1,7 @@
 import streamlit as st
 import os
 import random
+import base64
 
 st.set_page_config(
     page_title="Gabriel & Rilary ❤️",
@@ -11,60 +12,82 @@ st.set_page_config(
 
 NOME_1 = "Gabriel Ramos"
 NOME_2 = "Rilary Escobar"
-
 PASTA_FOTOS = "fotos"
 PASTA_MUSICAS = "musicas"
 
 st.markdown("""
 <style>
 [data-testid="stSidebar"], [data-testid="collapsedControl"] {display:none;}
+[data-testid="stHeader"] {background: transparent;}
+
 [data-testid="stAppViewContainer"] {
-    background: linear-gradient(135deg, #1b0f1f, #3b1238, #651d4b);
+    background:
+        radial-gradient(circle at top left, rgba(255,105,180,0.35), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(255,182,217,0.25), transparent 35%),
+        linear-gradient(135deg, #16081c, #321032, #5c1748);
     color: white;
 }
-[data-testid="stHeader"] {background: transparent;}
-.block-container {padding-top: 25px;}
+
+.block-container {
+    padding-top: 25px;
+    max-width: 1200px;
+}
+
 .titulo {
     text-align:center;
-    font-size:52px;
-    font-weight:bold;
-    color:#ffb6d9;
-    text-shadow:0 0 18px #ff4fa3;
+    font-size:58px;
+    font-weight:900;
+    color:#ffd1e8;
+    text-shadow:0 0 25px #ff4fa3;
+    margin-bottom:0;
 }
+
 .subtitulo {
     text-align:center;
-    font-size:24px;
-    color:#ffe3f1;
-    margin-bottom:25px;
+    font-size:25px;
+    color:#fff1f8;
+    margin-bottom:28px;
 }
+
 .card {
-    background:rgba(255,255,255,0.11);
-    padding:25px;
-    border-radius:25px;
+    background:rgba(255,255,255,0.13);
+    backdrop-filter: blur(10px);
+    padding:28px;
+    border-radius:28px;
     text-align:center;
-    box-shadow:0 0 22px rgba(255,105,180,0.35);
-    margin:18px 0;
-    font-size:20px;
+    box-shadow:0 0 30px rgba(255,105,180,0.35);
+    margin:20px 0;
+    font-size:21px;
+    border:1px solid rgba(255,255,255,0.18);
 }
+
 .stButton > button {
     width:100%;
-    border-radius:18px;
+    border-radius:22px;
     border:1px solid rgba(255,255,255,0.25);
-    background:rgba(255,255,255,0.12);
+    background:rgba(255,255,255,0.13);
     color:white;
-    font-weight:bold;
-    padding:12px;
+    font-weight:800;
+    padding:13px;
+    transition:0.25s;
+    box-shadow:0 0 18px rgba(255,105,180,0.15);
 }
+
 .stButton > button:hover {
-    background:rgba(255,105,180,0.35);
+    background:rgba(255,105,180,0.42);
     border:1px solid #ffb6d9;
+    transform:translateY(-2px);
 }
-img {border-radius:22px;}
+
+img {
+    border-radius:24px;
+}
+
 .footer {
     text-align:center;
     color:#ffd6eb;
-    margin-top:40px;
-    opacity:0.8;
+    margin-top:45px;
+    opacity:0.85;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -89,8 +112,6 @@ def carregar_musicas():
 
 
 def slideshow_html(fotos):
-    import base64
-
     imagens = []
     for foto in fotos:
         with open(foto, "rb") as f:
@@ -107,13 +128,14 @@ def slideshow_html(fotos):
     st.components.v1.html(f"""
     <style>
     .slideshow-container {{
-        max-width:680px;
-        height:520px;
+        max-width:760px;
+        height:560px;
         margin:auto;
-        border-radius:32px;
+        border-radius:38px;
         overflow:hidden;
-        box-shadow:0 0 40px rgba(255,105,180,0.7);
+        box-shadow:0 0 55px rgba(255,105,180,0.75);
         background:#160b19;
+        border:2px solid rgba(255,255,255,0.18);
     }}
     .slide {{
         display:none;
@@ -128,9 +150,9 @@ def slideshow_html(fotos):
         position:absolute;
         inset:0;
         background:inherit;
-        filter:blur(25px);
-        transform:scale(1.15);
-        opacity:0.45;
+        filter:blur(28px);
+        transform:scale(1.18);
+        opacity:0.52;
     }}
     .slide img {{
         position:relative;
@@ -162,10 +184,10 @@ def slideshow_html(fotos):
         slideIndex++;
         if (slideIndex > slides.length) {{slideIndex = 1;}}
         slides[slideIndex - 1].style.display = "block";
-        setTimeout(showSlides, 3000);
+        setTimeout(showSlides, 3200);
     }}
     </script>
-    """, height=550)
+    """, height=590)
 
 
 def trocar_pagina(pagina):
@@ -174,9 +196,6 @@ def trocar_pagina(pagina):
 
 if "pagina" not in st.session_state:
     st.session_state.pagina = "🏠 Início"
-
-if "site_liberado" not in st.session_state:
-    st.session_state.site_liberado = False
 
 if "musica_atual" not in st.session_state:
     st.session_state.musica_atual = 0
@@ -188,63 +207,41 @@ musicas = carregar_musicas()
 st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
 
-
-if not st.session_state.site_liberado:
-    st.markdown("""
-    <div class="card">
-        Clique para entrar no cantinho do casal ❤️
-    </div>
-    """, unsafe_allow_html=True)
-
-    if st.button("❤️ Entrar ❤️"):
-        st.session_state.site_liberado = True
-        st.rerun()
-
-    st.stop()
-
-
 if musicas:
     col_audio, col_next = st.columns([5, 1])
-
     with col_audio:
         st.audio(musicas[st.session_state.musica_atual], format="audio/mp3")
-
     with col_next:
         if st.button("🎵 Próxima"):
-            st.session_state.musica_atual += 1
-            if st.session_state.musica_atual >= len(musicas):
-                st.session_state.musica_atual = 0
+            st.session_state.musica_atual = (st.session_state.musica_atual + 1) % len(musicas)
             st.rerun()
 else:
     st.warning("Coloque músicas .mp3 dentro da pasta /musicas.")
 
+st.write("")
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
     if st.button("🏠 Início"):
         trocar_pagina("🏠 Início")
-
 with col2:
     if st.button("📸 Galeria"):
         trocar_pagina("📸 Galeria")
-
 with col3:
     if st.button("💕 Motivos"):
         trocar_pagina("💕 Motivos")
-
 with col4:
     if st.button("🎮 Quiz"):
         trocar_pagina("🎮 Quiz")
-
 with col5:
     if st.button("💌 Cartinha"):
         trocar_pagina("💌 Cartinha")
-
 with col6:
     if st.button("🌟 Futuro"):
         trocar_pagina("🌟 Futuro")
 
+st.write("")
 
 if st.session_state.pagina == "🏠 Início":
     if fotos:
@@ -259,7 +256,6 @@ if st.session_state.pagina == "🏠 Início":
     </div>
     """, unsafe_allow_html=True)
 
-
 elif st.session_state.pagina == "📸 Galeria":
     st.markdown("<div class='titulo'>Galeria de Momentos 📸</div>", unsafe_allow_html=True)
 
@@ -270,7 +266,6 @@ elif st.session_state.pagina == "📸 Galeria":
                 st.image(foto, use_container_width=True)
     else:
         st.info("Adicione fotos na pasta /fotos.")
-
 
 elif st.session_state.pagina == "💕 Motivos":
     st.markdown("<div class='titulo'>Motivos para Shippar 💕</div>", unsafe_allow_html=True)
@@ -292,7 +287,6 @@ elif st.session_state.pagina == "💕 Motivos":
     for motivo in motivos:
         st.markdown(f"<div class='card'>{motivo}</div>", unsafe_allow_html=True)
 
-
 elif st.session_state.pagina == "🎮 Quiz":
     st.markdown("<div class='titulo'>Quiz do Casal 🎮</div>", unsafe_allow_html=True)
 
@@ -313,10 +307,7 @@ elif st.session_state.pagina == "🎮 Quiz":
         enviar = st.form_submit_button("Ver resultado ❤️")
 
     if enviar:
-        pontos = 0
-        for i, item in enumerate(perguntas):
-            if respostas[i] == item[2]:
-                pontos += 1
+        pontos = sum(1 for i, item in enumerate(perguntas) if respostas[i] == item[2])
 
         st.markdown(f"""
         <div class="card">
@@ -331,7 +322,6 @@ elif st.session_state.pagina == "🎮 Quiz":
             st.success("Mandou bem! Você sabe bastante sobre eles 😄")
         else:
             st.warning("Hmm... precisa acompanhar mais esse casal kkkkk")
-
 
 elif st.session_state.pagina == "💌 Cartinha":
     st.markdown("<div class='titulo'>Cartinha Especial 💌</div>", unsafe_allow_html=True)
@@ -350,7 +340,6 @@ elif st.session_state.pagina == "💌 Cartinha":
     </div>
     """, unsafe_allow_html=True)
 
-
 elif st.session_state.pagina == "🌟 Futuro":
     st.markdown("<div class='titulo'>O Futuro de Vocês 🌟</div>", unsafe_allow_html=True)
 
@@ -365,7 +354,6 @@ elif st.session_state.pagina == "🌟 Futuro":
 
     for sonho in sonhos:
         st.markdown(f"<div class='card'>✨ {sonho}</div>", unsafe_allow_html=True)
-
 
 st.markdown("""
 <div class="footer">
