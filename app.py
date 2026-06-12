@@ -10,10 +10,21 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
+# =========================
+# CONFIGURAÇÕES
+# =========================
+
 NOME_1 = "Gabriel Ramos"
 NOME_2 = "Rilary Escobar"
-MUSICA = "musica.mp3"
+
 PASTA_FOTOS = "fotos"
+PASTA_MUSICAS = "musicas"
+
+VOLUME_MUSICA = 0.25  # 25% do volume
+
+# =========================
+# CSS
+# =========================
 
 st.markdown("""
 <style>
@@ -91,6 +102,9 @@ img {
 </style>
 """, unsafe_allow_html=True)
 
+# =========================
+# FUNÇÕES
+# =========================
 
 def carregar_fotos():
     if not os.path.exists(PASTA_FOTOS):
@@ -104,20 +118,55 @@ def carregar_fotos():
     return sorted(fotos)
 
 
-def tocar_musica():
-    if os.path.exists(MUSICA):
-        with open(MUSICA, "rb") as f:
-            audio = f.read()
+def tocar_musicas():
+    if not os.path.exists(PASTA_MUSICAS):
+        os.makedirs(PASTA_MUSICAS)
 
-        b64 = base64.b64encode(audio).decode()
+    musicas = []
+    for arquivo in os.listdir(PASTA_MUSICAS):
+        if arquivo.lower().endswith(".mp3"):
+            musicas.append(os.path.join(PASTA_MUSICAS, arquivo))
 
-        st.markdown(f"""
-        <audio autoplay loop>
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
-        </audio>
-        """, unsafe_allow_html=True)
-    else:
-        st.warning("Coloque o arquivo musica.mp3 na pasta principal do projeto.")
+    if not musicas:
+        st.warning("Coloque músicas .mp3 na pasta /musicas.")
+        return
+
+    playlist = ""
+
+    for musica in sorted(musicas):
+        with open(musica, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+            playlist += f'"data:audio/mp3;base64,{b64}",'
+
+    st.markdown(f"""
+    <audio id="player" autoplay></audio>
+
+    <script>
+    const playlist = [{playlist}];
+    let index = 0;
+    const player = document.getElementById("player");
+
+    player.volume = {VOLUME_MUSICA};
+
+    function tocarAtual() {{
+        player.src = playlist[index];
+        player.volume = {VOLUME_MUSICA};
+        player.play().catch(() => {{
+            console.log("Autoplay bloqueado pelo navegador.");
+        }});
+    }}
+
+    player.addEventListener("ended", function() {{
+        index++;
+        if (index >= playlist.length) {{
+            index = 0;
+        }}
+        tocarAtual();
+    }});
+
+    tocarAtual();
+    </script>
+    """, unsafe_allow_html=True)
 
 
 def slideshow_html(fotos):
@@ -219,14 +268,26 @@ def trocar_pagina(pagina):
     st.session_state.pagina = pagina
 
 
+# =========================
+# ESTADO
+# =========================
+
 if "pagina" not in st.session_state:
     st.session_state.pagina = "🏠 Início"
 
 fotos = carregar_fotos()
-tocar_musica()
+tocar_musicas()
+
+# =========================
+# CABEÇALHO
+# =========================
 
 st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
 st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
+
+# =========================
+# MENU
+# =========================
 
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
@@ -256,6 +317,10 @@ with col6:
 
 st.write("")
 
+# =========================
+# INÍCIO
+# =========================
+
 if st.session_state.pagina == "🏠 Início":
     if fotos:
         slideshow_html(fotos)
@@ -269,6 +334,10 @@ if st.session_state.pagina == "🏠 Início":
     </div>
     """, unsafe_allow_html=True)
 
+# =========================
+# GALERIA
+# =========================
+
 elif st.session_state.pagina == "📸 Galeria":
     st.markdown("<div class='titulo'>Galeria de Momentos 📸</div>", unsafe_allow_html=True)
 
@@ -280,6 +349,10 @@ elif st.session_state.pagina == "📸 Galeria":
                 st.image(foto, use_container_width=True)
     else:
         st.info("Adicione fotos na pasta /fotos.")
+
+# =========================
+# MOTIVOS
+# =========================
 
 elif st.session_state.pagina == "💕 Motivos":
     st.markdown("<div class='titulo'>Motivos para Shippar 💕</div>", unsafe_allow_html=True)
@@ -300,6 +373,10 @@ elif st.session_state.pagina == "💕 Motivos":
 
     for motivo in motivos:
         st.markdown(f"<div class='card'>{motivo}</div>", unsafe_allow_html=True)
+
+# =========================
+# QUIZ
+# =========================
 
 elif st.session_state.pagina == "🎮 Quiz":
     st.markdown("<div class='titulo'>Quiz do Casal 🎮</div>", unsafe_allow_html=True)
@@ -371,6 +448,10 @@ elif st.session_state.pagina == "🎮 Quiz":
         else:
             st.warning("Hmm... precisa acompanhar mais esse casal kkkkk")
 
+# =========================
+# CARTINHA
+# =========================
+
 elif st.session_state.pagina == "💌 Cartinha":
     st.markdown("<div class='titulo'>Cartinha Especial 💌</div>", unsafe_allow_html=True)
 
@@ -388,6 +469,10 @@ elif st.session_state.pagina == "💌 Cartinha":
     </div>
     """, unsafe_allow_html=True)
 
+# =========================
+# FUTURO
+# =========================
+
 elif st.session_state.pagina == "🌟 Futuro":
     st.markdown("<div class='titulo'>O Futuro de Vocês 🌟</div>", unsafe_allow_html=True)
 
@@ -402,6 +487,10 @@ elif st.session_state.pagina == "🌟 Futuro":
 
     for sonho in sonhos:
         st.markdown(f"<div class='card'>✨ {sonho}</div>", unsafe_allow_html=True)
+
+# =========================
+# RODAPÉ
+# =========================
 
 st.markdown("""
 <div class="footer">
