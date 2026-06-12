@@ -6,7 +6,8 @@ import random
 st.set_page_config(
     page_title="Gabriel & Rilary ❤️",
     page_icon="❤️",
-    layout="wide"
+    layout="wide",
+    initial_sidebar_state="collapsed"
 )
 
 # =========================
@@ -24,8 +25,12 @@ PASTA_FOTOS = "fotos"
 
 st.markdown("""
 <style>
-body {
-    background: linear-gradient(135deg, #1b0f1f, #3b1238, #651d4b);
+[data-testid="stSidebar"] {
+    display: none;
+}
+
+[data-testid="collapsedControl"] {
+    display: none;
 }
 
 [data-testid="stAppViewContainer"] {
@@ -33,37 +38,73 @@ body {
     color: white;
 }
 
-[data-testid="stSidebar"] {
-    background: #160b19;
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+.block-container {
+    padding-top: 25px;
 }
 
 .titulo {
     text-align: center;
-    font-size: 55px;
+    font-size: 52px;
     font-weight: bold;
     color: #ffb6d9;
-    text-shadow: 0 0 15px #ff4fa3;
+    text-shadow: 0 0 18px #ff4fa3;
+    margin-bottom: 5px;
 }
 
 .subtitulo {
     text-align: center;
     font-size: 24px;
     color: #ffe3f1;
+    margin-bottom: 25px;
 }
 
 .card {
-    background: rgba(255,255,255,0.10);
+    background: rgba(255,255,255,0.11);
     padding: 25px;
     border-radius: 25px;
     text-align: center;
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.35);
-    margin: 15px 0;
+    box-shadow: 0 0 22px rgba(255, 105, 180, 0.35);
+    margin: 18px 0;
+    font-size: 20px;
 }
 
-.foto-galeria img {
-    border-radius: 20px;
+.menu-container {
+    text-align: center;
+    margin-bottom: 30px;
 }
 
+.stButton > button {
+    width: 100%;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.12);
+    color: white;
+    font-weight: bold;
+    padding: 12px;
+    transition: 0.3s;
+}
+
+.stButton > button:hover {
+    background: rgba(255, 105, 180, 0.35);
+    color: white;
+    border: 1px solid #ffb6d9;
+    transform: scale(1.03);
+}
+
+img {
+    border-radius: 22px;
+}
+
+.footer {
+    text-align: center;
+    color: #ffd6eb;
+    margin-top: 40px;
+    opacity: 0.8;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -80,7 +121,7 @@ def carregar_fotos():
         if arquivo.lower().endswith((".png", ".jpg", ".jpeg", ".webp")):
             fotos.append(os.path.join(PASTA_FOTOS, arquivo))
 
-    return fotos
+    return sorted(fotos)
 
 
 def tocar_musica():
@@ -96,7 +137,7 @@ def tocar_musica():
         </audio>
         """, unsafe_allow_html=True)
     else:
-        st.warning("Coloque o arquivo musica.mp3 na pasta do projeto.")
+        st.warning("Coloque o arquivo musica.mp3 na pasta principal do projeto.")
 
 
 def slideshow_html(fotos):
@@ -108,7 +149,7 @@ def slideshow_html(fotos):
             imagens_base64.append(f"data:image/jpeg;base64,{b64}")
 
     slides = ""
-    for i, img in enumerate(imagens_base64):
+    for img in imagens_base64:
         slides += f"""
         <div class="slide fade">
             <img src="{img}">
@@ -118,13 +159,13 @@ def slideshow_html(fotos):
     html = f"""
     <style>
     .slideshow-container {{
-        max-width: 650px;
-        height: 500px;
+        max-width: 680px;
+        height: 520px;
         position: relative;
         margin: auto;
-        border-radius: 30px;
+        border-radius: 32px;
         overflow: hidden;
-        box-shadow: 0 0 35px rgba(255, 105, 180, 0.7);
+        box-shadow: 0 0 40px rgba(255, 105, 180, 0.7);
     }}
 
     .slide {{
@@ -140,11 +181,11 @@ def slideshow_html(fotos):
     }}
 
     .fade {{
-        animation: fadeEffect 2s;
+        animation: fadeEffect 1.8s;
     }}
 
     @keyframes fadeEffect {{
-        from {{opacity: .3}}
+        from {{opacity: .25}}
         to {{opacity: 1}}
     }}
     </style>
@@ -162,47 +203,80 @@ def slideshow_html(fotos):
         for (let i = 0; i < slides.length; i++) {{
             slides[i].style.display = "none";
         }}
+
         slideIndex++;
-        if (slideIndex > slides.length) {{slideIndex = 1}}
-        slides[slideIndex-1].style.display = "block";
+
+        if (slideIndex > slides.length) {{
+            slideIndex = 1;
+        }}
+
+        slides[slideIndex - 1].style.display = "block";
         setTimeout(showSlides, 3000);
     }}
     </script>
     """
 
-    st.components.v1.html(html, height=530)
+    st.components.v1.html(html, height=550)
+
+
+def trocar_pagina(pagina):
+    st.session_state.pagina = pagina
 
 
 # =========================
-# APP
+# ESTADO
 # =========================
+
+if "pagina" not in st.session_state:
+    st.session_state.pagina = "🏠 Início"
 
 fotos = carregar_fotos()
-
-st.sidebar.title("❤️ Menu do Amor")
-pagina = st.sidebar.radio(
-    "Escolha uma página:",
-    [
-        "🏠 Início",
-        "📸 Galeria",
-        "💕 Motivos para Shippar",
-        "😂 Curiosidades",
-        "💌 Cartinha",
-        "🌟 Futuro"
-    ]
-)
-
 tocar_musica()
 
 # =========================
-# PÁGINA INICIAL
+# CABEÇALHO
 # =========================
 
-if pagina == "🏠 Início":
-    st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
-    st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
-    st.write("")
+st.markdown(f"<div class='titulo'>{NOME_1} ❤️ {NOME_2}</div>", unsafe_allow_html=True)
+st.markdown("<div class='subtitulo'>O casal mais lindo do Brasil</div>", unsafe_allow_html=True)
 
+# =========================
+# MENU SUPERIOR
+# =========================
+
+col1, col2, col3, col4, col5, col6 = st.columns(6)
+
+with col1:
+    if st.button("🏠 Início"):
+        trocar_pagina("🏠 Início")
+
+with col2:
+    if st.button("📸 Galeria"):
+        trocar_pagina("📸 Galeria")
+
+with col3:
+    if st.button("💕 Motivos"):
+        trocar_pagina("💕 Motivos")
+
+with col4:
+    if st.button("😂 Curiosidades"):
+        trocar_pagina("😂 Curiosidades")
+
+with col5:
+    if st.button("💌 Cartinha"):
+        trocar_pagina("💌 Cartinha")
+
+with col6:
+    if st.button("🌟 Futuro"):
+        trocar_pagina("🌟 Futuro")
+
+st.write("")
+
+# =========================
+# PÁGINA INÍCIO
+# =========================
+
+if st.session_state.pagina == "🏠 Início":
     if fotos:
         slideshow_html(fotos)
     else:
@@ -216,10 +290,10 @@ if pagina == "🏠 Início":
     """, unsafe_allow_html=True)
 
 # =========================
-# GALERIA
+# PÁGINA GALERIA
 # =========================
 
-elif pagina == "📸 Galeria":
+elif st.session_state.pagina == "📸 Galeria":
     st.markdown("<div class='titulo'>Galeria de Momentos 📸</div>", unsafe_allow_html=True)
 
     if fotos:
@@ -232,10 +306,10 @@ elif pagina == "📸 Galeria":
         st.info("Adicione fotos na pasta /fotos.")
 
 # =========================
-# MOTIVOS
+# PÁGINA MOTIVOS
 # =========================
 
-elif pagina == "💕 Motivos para Shippar":
+elif st.session_state.pagina == "💕 Motivos":
     st.markdown("<div class='titulo'>Motivos para Shippar 💕</div>", unsafe_allow_html=True)
 
     motivos = [
@@ -244,7 +318,9 @@ elif pagina == "💕 Motivos para Shippar":
         "Porque são fofos até sem tentar.",
         "Porque esse casal tem energia de filme romântico.",
         "Porque Gabriel e Rilary simplesmente fazem sentido.",
-        "Porque são o casal mais lindo do Brasil."
+        "Porque são o casal mais lindo do Brasil.",
+        "Porque onde tem eles dois, tem risada.",
+        "Porque o amor deles deixa qualquer dia mais bonito."
     ]
 
     if st.button("Sortear motivo ❤️"):
@@ -254,10 +330,10 @@ elif pagina == "💕 Motivos para Shippar":
         st.markdown(f"<div class='card'>{motivo}</div>", unsafe_allow_html=True)
 
 # =========================
-# CURIOSIDADES
+# PÁGINA CURIOSIDADES
 # =========================
 
-elif pagina == "😂 Curiosidades":
+elif st.session_state.pagina == "😂 Curiosidades":
     st.markdown("<div class='titulo'>Curiosidades do Casal 😂</div>", unsafe_allow_html=True)
 
     perguntas = [
@@ -266,17 +342,19 @@ elif pagina == "😂 Curiosidades":
         "Quem sente mais saudade?",
         "Quem é mais dramático?",
         "Quem pede desculpas primeiro?",
-        "Quem é mais provável de mandar áudio gigante?"
+        "Quem é mais provável de mandar áudio gigante?",
+        "Quem escolheria o filme ruim só pela capa?",
+        "Quem roubaria comida do prato do outro?"
     ]
 
     for p in perguntas:
         st.markdown(f"<div class='card'>💭 {p}</div>", unsafe_allow_html=True)
 
 # =========================
-# CARTINHA
+# PÁGINA CARTINHA
 # =========================
 
-elif pagina == "💌 Cartinha":
+elif st.session_state.pagina == "💌 Cartinha":
     st.markdown("<div class='titulo'>Cartinha Especial 💌</div>", unsafe_allow_html=True)
 
     st.markdown("""
@@ -286,15 +364,18 @@ elif pagina == "💌 Cartinha":
         Que cada momento juntos vire lembrança boa, cada sorriso vire motivo
         para continuar, e cada fase fortaleça ainda mais essa história.
         <br><br>
-        Vocês são especiais juntos. ❤️
+        Algumas histórias não precisam ser perfeitas para serem lindas.
+        Elas só precisam ser verdadeiras.
+        <br><br>
+        E a de vocês tem aquele jeitinho especial de quem nasceu para dar certo. ❤️
     </div>
     """, unsafe_allow_html=True)
 
 # =========================
-# FUTURO
+# PÁGINA FUTURO
 # =========================
 
-elif pagina == "🌟 Futuro":
+elif st.session_state.pagina == "🌟 Futuro":
     st.markdown("<div class='titulo'>O Futuro de Vocês 🌟</div>", unsafe_allow_html=True)
 
     sonhos = [
@@ -308,3 +389,13 @@ elif pagina == "🌟 Futuro":
 
     for sonho in sonhos:
         st.markdown(f"<div class='card'>✨ {sonho}</div>", unsafe_allow_html=True)
+
+# =========================
+# RODAPÉ
+# =========================
+
+st.markdown("""
+<div class="footer">
+    Feito com carinho ❤️
+</div>
+""", unsafe_allow_html=True)
